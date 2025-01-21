@@ -1,19 +1,16 @@
 function donateLuckyPoints(amount)
     local args = {
-        [1] = "Luck",         -- Tên hệ thống donate
-        [2] = "Crowns",       -- Loại tài nguyên cần donate
-        [3] = amount          -- Số lượng muốn donate
+        [1] = "Luck",         
+        [2] = "Crowns",       
+        [3] = amount          
     }
 
-    
     game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.1.0"):WaitForChild("net"):WaitForChild("RE/ClanUpgrade"):FireServer(unpack(args))
-    print("Đã donate thành công" .. amount .. " Crowns một lần.")
+    print("Đã donate thành công " .. amount .. " Crowns.")
 end
 
-
-donateLuckyPoints(100)  -- Donate 100 Crowns một lần
-
-
-print("Đang đợi 1 phút...")
-wait(60) 
-
+while true do
+    donateLuckyPoints(100)  
+    print("Đang đợi 1 phút...")
+    wait(60)  
+end
