@@ -15,5 +15,5 @@ donateLuckyPoints(100)  -- Donate 100 Crowns một lần
 
 
 print("Đang đợi 10 phút...")
-wait(600) 
+wait(60) 
 
