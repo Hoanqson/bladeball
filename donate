@@ -2,70 +2,93 @@ local donateEnabled = true  -- Biến kiểm soát việc donate
 local donateLoopRunning = false  -- Biến để kiểm soát vòng lặp donate
 
 -- Tạo UI để điều khiển donate
-local screenGui = Instance.new("ScreenGui")
-screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+local screenGui
 
 -- Tạo khung để di chuyển UI (bao gồm nút tắt/mở donate)
-local dragFrame = Instance.new("Frame")
-dragFrame.Size = UDim2.new(0, 300, 0, 60)  -- Kích thước UI
-dragFrame.Position = UDim2.new(0, 10, 0, 10)  -- Vị trí UI trên màn hình
-dragFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)  -- Màu nền đen
-dragFrame.BackgroundTransparency = 0.5  -- Nền trong suốt
-dragFrame.BorderSizePixel = 0  -- Loại bỏ đường viền
-dragFrame.Parent = screenGui
+local dragFrame
 
 -- Tạo phần trống cho phép di chuyển UI (toàn bộ frame sẽ di chuyển, không chỉ phần trên)
-local dragArea = Instance.new("Frame")
-dragArea.Size = UDim2.new(1, 0, 1, 0)  -- Phần trống sẽ phủ toàn bộ UI để di chuyển
-dragArea.Position = UDim2.new(0, 0, 0, 0)  -- Phần trống phủ toàn bộ frame
-dragArea.BackgroundTransparency = 0.5  -- Nền trong suốt
-dragArea.BackgroundColor3 = Color3.fromRGB(0, 0, 0)  -- Màu nền đen
-dragArea.BorderSizePixel = 0  -- Loại bỏ đường viền
-dragArea.Parent = dragFrame
+local dragArea
 
 -- Tạo nút "Tắt/Mở Donate" và đặt nó ở giữa
-local toggleButton = Instance.new("TextButton")
-toggleButton.Size = UDim2.new(0, 180, 0, 20)  -- Nút nhỏ hơn, nằm ở giữa
-toggleButton.Position = UDim2.new(0.5, -90, 0.5, -10)  -- Căn giữa
-toggleButton.Text = "Tắt Donate"
-toggleButton.TextSize = 24
-toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)  -- Màu chữ trắng
-toggleButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)  -- Màu nền đen
-toggleButton.Font = Enum.Font.GothamBold
-toggleButton.BackgroundTransparency = 0.5  -- Nền trong suốt
-toggleButton.BorderSizePixel = 0  -- Loại bỏ đường viền
-toggleButton.Parent = dragFrame
+local toggleButton
 
 -- Biến để kiểm soát việc di chuyển
 local dragging = false
 local dragStart = nil
 local startPos = nil
 
--- Hàm để bắt đầu kéo UI
-dragArea.InputBegan:Connect(function(input, gameProcessed)
-    if gameProcessed then return end  -- Không xử lý nếu game đã xử lý sự kiện
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = true
-        dragStart = input.Position
-        startPos = dragFrame.Position
-    end
-end)
+-- Hàm để tạo lại UI khi respawn
+local function createUI()
+    screenGui = Instance.new("ScreenGui")
+    screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
--- Hàm để kéo UI khi chuột di chuyển
-dragArea.InputChanged:Connect(function(input)
-    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-        local delta = input.Position - dragStart
-        -- Cập nhật vị trí của dragFrame mượt mà hơn
-        dragFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    end
-end)
+    -- Tạo khung UI
+    dragFrame = Instance.new("Frame")
+    dragFrame.Size = UDim2.new(0, 300, 0, 60)  -- Kích thước UI
+    dragFrame.Position = UDim2.new(0, 10, 0, 10)  -- Vị trí UI trên màn hình
+    dragFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)  -- Màu nền đen
+    dragFrame.BackgroundTransparency = 0.5  -- Nền trong suốt
+    dragFrame.BorderSizePixel = 0  -- Loại bỏ đường viền
+    dragFrame.Parent = screenGui
 
--- Hàm để kết thúc việc kéo UI
-dragArea.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = false
-    end
-end)
+    -- Tạo phần trống để di chuyển UI
+    dragArea = Instance.new("Frame")
+    dragArea.Size = UDim2.new(1, 0, 1, 0)  -- Phần trống sẽ phủ toàn bộ UI để di chuyển
+    dragArea.Position = UDim2.new(0, 0, 0, 0)  -- Phần trống phủ toàn bộ frame
+    dragArea.BackgroundTransparency = 0.5  -- Nền trong suốt
+    dragArea.BackgroundColor3 = Color3.fromRGB(0, 0, 0)  -- Màu nền đen
+    dragArea.BorderSizePixel = 0  -- Loại bỏ đường viền
+    dragArea.Parent = dragFrame
+
+    -- Tạo nút "Tắt/Mở Donate"
+    toggleButton = Instance.new("TextButton")
+    toggleButton.Size = UDim2.new(0, 180, 0, 20)  -- Nút nhỏ hơn, nằm ở giữa
+    toggleButton.Position = UDim2.new(0.5, -90, 0.5, -10)  -- Căn giữa
+    toggleButton.Text = donateEnabled and "Tắt Donate" or "Mở Donate"
+    toggleButton.TextSize = 24
+    toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)  -- Màu chữ trắng
+    toggleButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)  -- Màu nền đen
+    toggleButton.Font = Enum.Font.GothamBold
+    toggleButton.BackgroundTransparency = 0.5  -- Nền trong suốt
+    toggleButton.BorderSizePixel = 0  -- Loại bỏ đường viền
+    toggleButton.Parent = dragFrame
+
+    -- Xử lý sự kiện kéo UI
+    dragArea.InputBegan:Connect(function(input, gameProcessed)
+        if gameProcessed then return end
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPos = dragFrame.Position
+        end
+    end)
+
+    dragArea.InputChanged:Connect(function(input)
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local delta = input.Position - dragStart
+            dragFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+
+    dragArea.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
+
+    -- Kiểm tra trạng thái nút và thực hiện donate
+    toggleButton.MouseButton1Click:Connect(function()
+        donateEnabled = not donateEnabled
+        toggleButton.Text = donateEnabled and "Tắt Donate" or "Mở Donate"
+        -- In ra thông báo khi bật/tắt donate
+        if donateEnabled then
+            print("Donate đã được bật")
+        else
+            print("Donate đã được tắt")
+        end
+    end)
+end
 
 -- Hàm donate
 function donateLuckyPoints(amount)
@@ -79,16 +102,6 @@ function donateLuckyPoints(amount)
     print("Đã donate thành công " .. amount .. " Crowns.")
 end
 
--- Kiểm tra trạng thái nút và thực hiện donate
-toggleButton.MouseButton1Click:Connect(function()
-    donateEnabled = not donateEnabled
-    if donateEnabled then
-        toggleButton.Text = "Tắt Donate"
-    else
-        toggleButton.Text = "Mở Donate"
-    end
-end)
-
 -- Vòng lặp donate nếu donateEnabled là true
 local function startDonateLoop()
     while donateEnabled do
@@ -100,53 +113,28 @@ end
 
 -- Lắng nghe sự kiện respawn của người chơi để tạo lại UI khi chết và respawn
 game.Players.LocalPlayer.CharacterAdded:Connect(function()
-    -- Kiểm tra nếu UI đã tồn tại và xóa nó
+    -- Nếu UI tồn tại, xóa nó
     if screenGui then
         screenGui:Destroy()
     end
-    
+
     -- Tạo lại UI khi respawn
-    screenGui = Instance.new("ScreenGui")
-    screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-    
-    -- Tạo các phần tử UI như trước
-    dragFrame = Instance.new("Frame")
-    dragFrame.Size = UDim2.new(0, 300, 0, 60)
-    dragFrame.Position = UDim2.new(0, 10, 0, 10)
-    dragFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    dragFrame.BackgroundTransparency = 0.5
-    dragFrame.BorderSizePixel = 0
-    dragFrame.Parent = screenGui
-    
-    dragArea = Instance.new("Frame")
-    dragArea.Size = UDim2.new(1, 0, 1, 0)
-    dragArea.Position = UDim2.new(0, 0, 0, 0)
-    dragArea.BackgroundTransparency = 0.5
-    dragArea.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    dragArea.BorderSizePixel = 0
-    dragArea.Parent = dragFrame
-    
-    toggleButton = Instance.new("TextButton")
-    toggleButton.Size = UDim2.new(0, 180, 0, 20)
-    toggleButton.Position = UDim2.new(0.5, -90, 0.5, -10)
-    toggleButton.Text = donateEnabled and "Tắt Donate" or "Mở Donate"  -- Giữ nguyên trạng thái nút
-    toggleButton.TextSize = 24
-    toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    toggleButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    toggleButton.Font = Enum.Font.GothamBold
-    toggleButton.BackgroundTransparency = 0.5
-    toggleButton.BorderSizePixel = 0
-    toggleButton.Parent = dragFrame
-    
-    -- Kiểm tra nếu vòng lặp donate đang chạy
+    createUI()
+
+    -- Nếu donateLoop không chạy, bắt đầu vòng lặp donate
     if not donateLoopRunning then
         donateLoopRunning = true
-        startDonateLoop()  -- Bắt đầu vòng lặp donate
+        print("Vòng lặp donate bắt đầu")
+        startDonateLoop()
     end
 end)
 
 -- Tạo UI khi bắt đầu trò chơi
+createUI()
+
+-- Nếu vòng lặp donate chưa chạy, bắt đầu vòng lặp donate
 if not donateLoopRunning then
     donateLoopRunning = true
+    print("Vòng lặp donate bắt đầu")
     startDonateLoop()
 end
