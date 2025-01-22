@@ -1,3 +1,72 @@
+local donateEnabled = true  -- Biến kiểm soát việc donate
+
+-- Tạo UI để điều khiển donate
+local screenGui = Instance.new("ScreenGui")
+screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+-- Tạo khung để di chuyển UI (bao gồm nút tắt/mở donate)
+local dragFrame = Instance.new("Frame")
+dragFrame.Size = UDim2.new(0, 300, 0, 60)  -- Kích thước UI
+dragFrame.Position = UDim2.new(0, 10, 0, 10)  -- Vị trí UI trên màn hình
+dragFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)  -- Màu nền đen
+dragFrame.BackgroundTransparency = 0.5  -- Nền trong suốt
+dragFrame.BorderSizePixel = 0  -- Loại bỏ đường viền
+dragFrame.Parent = screenGui
+
+-- Tạo phần trống cho phép di chuyển UI (toàn bộ frame sẽ di chuyển, không chỉ phần trên)
+local dragArea = Instance.new("Frame")
+dragArea.Size = UDim2.new(1, 0, 1, 0)  -- Phần trống sẽ phủ toàn bộ UI để di chuyển
+dragArea.Position = UDim2.new(0, 0, 0, 0)  -- Phần trống phủ toàn bộ frame
+dragArea.BackgroundTransparency = 0.5  -- Nền trong suốt
+dragArea.BackgroundColor3 = Color3.fromRGB(0, 0, 0)  -- Màu nền đen
+dragArea.BorderSizePixel = 0  -- Loại bỏ đường viền
+dragArea.Parent = dragFrame
+
+-- Tạo nút "Tắt/Mở Donate" và đặt nó ở giữa
+local toggleButton = Instance.new("TextButton")
+toggleButton.Size = UDim2.new(0, 180, 0, 20)  -- Nút nhỏ hơn, nằm ở giữa
+toggleButton.Position = UDim2.new(0.5, -90, 0.5, -10)  -- Căn giữa
+toggleButton.Text = "Tắt Donate"
+toggleButton.TextSize = 24
+toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)  -- Màu chữ trắng
+toggleButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)  -- Màu nền đen
+toggleButton.Font = Enum.Font.GothamBold
+toggleButton.BackgroundTransparency = 0.5  -- Nền trong suốt
+toggleButton.BorderSizePixel = 0  -- Loại bỏ đường viền
+toggleButton.Parent = dragFrame
+
+-- Biến để kiểm soát việc di chuyển
+local dragging = false
+local dragStart = nil
+local startPos = nil
+
+-- Hàm để bắt đầu kéo UI
+dragArea.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end  -- Không xử lý nếu game đã xử lý sự kiện
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = dragFrame.Position
+    end
+end)
+
+-- Hàm để kéo UI khi chuột di chuyển
+dragArea.InputChanged:Connect(function(input)
+    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = input.Position - dragStart
+        -- Cập nhật vị trí của dragFrame mượt mà hơn
+        dragFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+
+-- Hàm để kết thúc việc kéo UI
+dragArea.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = false
+    end
+end)
+
+-- Hàm donate
 function donateLuckyPoints(amount)
     local args = {
         [1] = "Luck",         
@@ -9,8 +78,23 @@ function donateLuckyPoints(amount)
     print("Đã donate thành công " .. amount .. " Crowns.")
 end
 
+-- Kiểm tra trạng thái nút và thực hiện donate
+toggleButton.MouseButton1Click:Connect(function()
+    donateEnabled = not donateEnabled
+    if donateEnabled then
+        toggleButton.Text = "Tắt Donate"
+    else
+        toggleButton.Text = "Mở Donate"
+    end
+end)
+
+-- Vòng lặp donate nếu donateEnabled là true
 while true do
-    donateLuckyPoints(100)  
-    print("Đang đợi 1 phút...")
-    wait(60)  
+    if donateEnabled then
+        donateLuckyPoints(100)  
+        print("Đang đợi 1 phút...")
+        wait(60)  -- Đợi 60 giây trước khi donate tiếp
+    else
+        wait(1)  -- Nếu donate bị tắt, đợi 1 giây trước khi kiểm tra lại
+    end
 end
