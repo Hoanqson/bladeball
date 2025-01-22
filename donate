@@ -89,12 +89,61 @@ toggleButton.MouseButton1Click:Connect(function()
 end)
 
 -- Vòng lặp donate nếu donateEnabled là true
-while true do
-    if donateEnabled then
-        donateLuckyPoints(100)  
-        print("Đang đợi 1 phút...")
-        wait(60)  -- Đợi 60 giây trước khi donate tiếp
-    else
-        wait(1)  -- Nếu donate bị tắt, đợi 1 giây trước khi kiểm tra lại
+local function startDonateLoop()
+    while true do
+        if donateEnabled then
+            donateLuckyPoints(100)  
+            print("Đang đợi 1 phút...")
+            wait(60)  -- Đợi 60 giây trước khi donate tiếp
+        else
+            wait(1)  -- Nếu donate bị tắt, đợi 1 giây trước khi kiểm tra lại
+        end
     end
 end
+
+-- Lắng nghe sự kiện respawn của người chơi để tạo lại UI khi chết và respawn
+game.Players.LocalPlayer.CharacterAdded:Connect(function()
+    -- Kiểm tra nếu UI đã tồn tại và xóa nó
+    if screenGui then
+        screenGui:Destroy()
+    end
+    
+    -- Tạo lại UI khi respawn
+    screenGui = Instance.new("ScreenGui")
+    screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+    
+    -- Tạo các phần tử UI như trước
+    dragFrame = Instance.new("Frame")
+    dragFrame.Size = UDim2.new(0, 300, 0, 60)
+    dragFrame.Position = UDim2.new(0, 10, 0, 10)
+    dragFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    dragFrame.BackgroundTransparency = 0.5
+    dragFrame.BorderSizePixel = 0
+    dragFrame.Parent = screenGui
+    
+    dragArea = Instance.new("Frame")
+    dragArea.Size = UDim2.new(1, 0, 1, 0)
+    dragArea.Position = UDim2.new(0, 0, 0, 0)
+    dragArea.BackgroundTransparency = 0.5
+    dragArea.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    dragArea.BorderSizePixel = 0
+    dragArea.Parent = dragFrame
+    
+    toggleButton = Instance.new("TextButton")
+    toggleButton.Size = UDim2.new(0, 180, 0, 20)
+    toggleButton.Position = UDim2.new(0.5, -90, 0.5, -10)
+    toggleButton.Text = "Tắt Donate"
+    toggleButton.TextSize = 24
+    toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    toggleButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    toggleButton.Font = Enum.Font.GothamBold
+    toggleButton.BackgroundTransparency = 0.5
+    toggleButton.BorderSizePixel = 0
+    toggleButton.Parent = dragFrame
+    
+    -- Tiếp tục vòng lặp donate
+    startDonateLoop()
+end)
+
+-- Tạo UI khi bắt đầu trò chơi
+startDonateLoop()
