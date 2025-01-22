@@ -132,7 +132,7 @@ game.Players.LocalPlayer.CharacterAdded:Connect(function()
     toggleButton = Instance.new("TextButton")
     toggleButton.Size = UDim2.new(0, 180, 0, 20)
     toggleButton.Position = UDim2.new(0.5, -90, 0.5, -10)
-    toggleButton.Text = "Tắt Donate"
+    toggleButton.Text = donateEnabled and "Tắt Donate" or "Mở Donate"  -- Giữ nguyên trạng thái nút
     toggleButton.TextSize = 24
     toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     toggleButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
