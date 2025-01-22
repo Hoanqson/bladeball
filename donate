@@ -1,4 +1,5 @@
 local donateEnabled = true  -- Biến kiểm soát việc donate
+local donateLoopRunning = false  -- Biến để kiểm soát vòng lặp donate
 
 -- Tạo UI để điều khiển donate
 local screenGui = Instance.new("ScreenGui")
@@ -90,14 +91,10 @@ end)
 
 -- Vòng lặp donate nếu donateEnabled là true
 local function startDonateLoop()
-    while true do
-        if donateEnabled then
-            donateLuckyPoints(100)  
-            print("Đang đợi 1 phút...")
-            wait(60)  -- Đợi 60 giây trước khi donate tiếp
-        else
-            wait(1)  -- Nếu donate bị tắt, đợi 1 giây trước khi kiểm tra lại
-        end
+    while donateEnabled do
+        donateLuckyPoints(100)  
+        print("Đang đợi 1 phút...")
+        wait(60)  -- Đợi 60 giây trước khi donate tiếp
     end
 end
 
@@ -141,9 +138,15 @@ game.Players.LocalPlayer.CharacterAdded:Connect(function()
     toggleButton.BorderSizePixel = 0
     toggleButton.Parent = dragFrame
     
-    -- Tiếp tục vòng lặp donate
-    startDonateLoop()
+    -- Kiểm tra nếu vòng lặp donate đang chạy
+    if not donateLoopRunning then
+        donateLoopRunning = true
+        startDonateLoop()  -- Bắt đầu vòng lặp donate
+    end
 end)
 
 -- Tạo UI khi bắt đầu trò chơi
-startDonateLoop()
+if not donateLoopRunning then
+    donateLoopRunning = true
+    startDonateLoop()
+end
