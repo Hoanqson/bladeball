@@ -20,6 +20,9 @@ local startPos = nil
 
 -- Hàm để tạo lại UI khi respawn
 local function createUI()
+    -- In thông báo khi tạo lại UI
+    print("Tạo lại UI khi respawn")
+
     screenGui = Instance.new("ScreenGui")
     screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
@@ -113,6 +116,9 @@ end
 
 -- Lắng nghe sự kiện respawn của người chơi để tạo lại UI khi chết và respawn
 game.Players.LocalPlayer.CharacterAdded:Connect(function()
+    -- In thông báo khi respawn
+    print("Nhân vật respawn, tạo lại UI")
+
     -- Nếu UI tồn tại, xóa nó
     if screenGui then
         screenGui:Destroy()
