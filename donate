@@ -81,12 +81,6 @@ local function createUI()
     toggleButton.MouseButton1Click:Connect(function()
         donateEnabled = not donateEnabled
         toggleButton.Text = donateEnabled and "Tắt Donate" or "Mở Donate"
-        -- In ra thông báo khi bật/tắt donate
-        if donateEnabled then
-            print("Donate đã được bật")
-        else
-            print("Donate đã được tắt")
-        end
     end)
 end
 
@@ -124,7 +118,6 @@ game.Players.LocalPlayer.CharacterAdded:Connect(function()
     -- Nếu donateLoop không chạy, bắt đầu vòng lặp donate
     if not donateLoopRunning then
         donateLoopRunning = true
-        print("Vòng lặp donate bắt đầu")
         startDonateLoop()
     end
 end)
@@ -135,6 +128,5 @@ createUI()
 -- Nếu vòng lặp donate chưa chạy, bắt đầu vòng lặp donate
 if not donateLoopRunning then
     donateLoopRunning = true
-    print("Vòng lặp donate bắt đầu")
     startDonateLoop()
 end
